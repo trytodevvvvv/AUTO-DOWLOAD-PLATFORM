@@ -1,0 +1,23 @@
+{
+  "name": "youtube-speed-downloader",
+  "version": "1.0.0",
+  "description": "Ultra Fast Multi-threaded YouTube Downloader with yt-dlp & aria2c in Electron",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": [
+    "youtube",
+    "downloader",
+    "yt-dlp",
+    "aria2",
+    "electron"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.2.0"
+  }
+}

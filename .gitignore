@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Local personal user configuration & private paths
+# (Tuyet doi khong day config va duong dan ca nhan len GitHub)
+config.json
+
+# Local history or runtime logs
+*.log
+npm-debug.log*
+
+# Root level test screenshots & scratch files
+/batch_tab_rendered.png
+/capture_*.png
+/rendered_page.png
+scratch/
+
+# Production build outputs
+dist/
+build/
+out/
+
+# OS and Editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.agents/

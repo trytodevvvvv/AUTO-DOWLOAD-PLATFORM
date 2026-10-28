@@ -1,0 +1,9 @@
+{
+  "downloadDir": "",
+  "connections": 16,
+  "container": "mp4",
+  "chunkSize": "10M",
+  "prefer60fps": true,
+  "fpsMode": "all",
+  "batchQuality": "best"
+}

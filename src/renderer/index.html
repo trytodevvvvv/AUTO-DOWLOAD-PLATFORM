@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi" style="background-color: #08090d; color: #f0f2f5;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HYPER TUBE - YouTube Speed Downloader</title>
+  <!-- Critical Inline CSS: locks background to obsidian dark before any stylesheet parses -->
+  <style>
+    html, body {
+      background-color: #08090d !important;
+      color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <!-- Offline Local Fonts (Zero FOUT / Anti-glitch) -->
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background-color: #08090d; color: #f0f2f5;">
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="logo-group">
+        <div class="logo-icon-wrapper">
+          <svg class="brand-vector-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="neonGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00f2fe" />
+                <stop offset="50%" stop-color="#4facfe" />
+                <stop offset="100%" stop-color="#ff007f" />
+              </linearGradient>
+              <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="35%" stop-color="#00f2fe" />
+                <stop offset="100%" stop-color="#4facfe" />
+              </linearGradient>
+            </defs>
+            <!-- Glowing Play Triangle -->
+            <polygon points="11,7 41,24 11,41" fill="url(#neonGlowGrad)" stroke="#00f2fe" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Hyper Speed Lightning Bolt -->
+            <path d="M26,5 L14,25 L23,25 L19,43 L35,21 L26,21 Z" fill="url(#boltGrad)" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="app-title-row">
+            <h1 class="app-title">HYPER<span class="gradient-text">TUBE</span></h1>
+            <span class="version-badge">PRO 16X</span>
+          </div>
+          <p class="app-subtitle">Bộ tăng tốc tải video YouTube đa luồng cực đại (IDM-Grade Chunking)</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="tab-download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Tải Video</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-batch">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          <path d="M12 11h4"></path>
+          <path d="M12 16h4"></path>
+          <path d="M8 11h.01"></path>
+          <path d="M8 16h.01"></path>
+        </svg>
+        <span>Tải hàng loạt</span>
+        <span class="tab-badge" id="batchBadge">0</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-history">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Lịch sử tải</span>
+        <span class="tab-badge" id="historyCount">0</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Cấu hình tốc độ</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: DOWNLOAD -->
+    <main class="tab-content active" id="tab-download">
+      <!-- Search & URL Input Box -->
+      <section class="url-input-card">
+        <div class="input-glow-wrapper">
+          <div class="input-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </div>
+          <input type="text" id="urlInput" class="url-input" placeholder="Dán link video YouTube tại đây (VD: https://www.youtube.com/watch?v=...)" spellcheck="false" autocomplete="off" />
+          <button class="btn-paste" id="btnPaste" title="Dán nhanh từ Clipboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+            <span>Dán link</span>
+          </button>
+          <button class="btn-check" id="btnCheck">
+            <span class="btn-text">Kiểm tra Video</span>
+            <span class="spinner" id="checkSpinner"></span>
+          </button>
+        </div>
+        <div class="input-hint">
+          <span>⚡ Hỗ trợ video độ phân giải cao: <strong>1080p, 2K, 4K, 8K, 60fps</strong> | Tự động chia nhỏ 16 luồng tăng tốc tối đa</span>
+        </div>
+      </section>
+
+      <!-- Active Downloading Progress Panel -->
+      <section class="download-progress-card hidden" id="activeDownloadCard">
+        <div class="dl-header">
+          <div class="dl-title-group">
+            <div class="pulsing-badge">
+              <span class="pulsing-circle"></span>
+              <span id="dlStatusBadge">ĐANG TẢI ĐA LUỒNG</span>
+            </div>
+            <h3 class="dl-video-title" id="dlVideoTitle">Đang chuẩn bị...</h3>
+          </div>
+          <button class="btn-cancel" id="btnCancelDownload" title="Dừng tiến trình tải">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>Hủy</span>
+          </button>
+        </div>
+
+        <!-- Progress Metrics -->
+        <div class="metrics-grid">
+          <div class="metric-card speed-card">
+            <span class="metric-label">TỐC ĐỘ TẢI HIỆN TẠI</span>
+            <div class="metric-value-row">
+              <span class="metric-value highlight" id="dlSpeed">0.0 MB/s</span>
+              <span class="thread-indicator" id="dlThreads">16 Luồng</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">TIẾN ĐỘ / DUNG LƯỢNG</span>
+            <div class="metric-value-row">
+              <span class="metric-value" id="dlProgressText">0%</span>
+              <span class="metric-sub" id="dlSizeText">0 MB / 0 MB</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">THỜI GIAN CÒN LẠI (ETA)</span>
+            <div class="metric-value-row">
+              <span class="metric-value" id="dlEta">--:--</span>
+              <span class="metric-sub" id="dlPhase">HTTP Chunking</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar Container -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="dlProgressBar" style="width: 0%">
+            <div class="progress-bar-glow"></div>
+          </div>
+        </div>
+
+        <div class="dl-footer-status">
+          <span class="status-msg" id="dlStatusMsg">Đang kết nối tới CDN YouTube...</span>
+          <div class="action-buttons-group hidden" id="dlActionButtons">
+            <button class="btn-action primary" id="btnOpenTargetFile">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Phát Video</span>
+            </button>
+            <button class="btn-action secondary" id="btnOpenTargetFolder">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Mở thư mục</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Video Details & Quality Selection (Reveals on Check) -->
+      <section class="video-preview-card hidden" id="videoPreviewCard">
+        <div class="preview-layout">
+          <!-- Thumbnail & Info -->
+          <div class="preview-media">
+            <div class="thumbnail-wrapper">
+              <img id="prevThumbnail" src="" alt="Thumbnail" />
+              <span class="duration-badge" id="prevDuration">00:00</span>
+            </div>
+            <div class="video-meta">
+              <h2 class="video-title" id="prevTitle">Tiêu đề video</h2>
+              <div class="meta-row">
+                <span class="meta-item author" id="prevAuthor">Kênh YouTube</span>
+                <span class="meta-separator">•</span>
+                <span class="meta-item views" id="prevViews">0 lượt xem</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quality Selector Section -->
+          <div class="preview-selector">
+            <div class="selector-header">
+              <div class="selector-tabs">
+                <button class="sel-tab active" data-mode="video">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                  <span>Video (Hình + Tiếng MP4)</span>
+                </button>
+                <button class="sel-tab" data-mode="audio">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18V5l12-2v13"></path>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <circle cx="18" cy="16" r="3"></circle>
+                  </svg>
+                  <span>Chỉ lấy Âm thanh (Audio)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Video Quality Options List -->
+            <div class="options-container" id="videoOptionsList">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Audio Options List -->
+            <div class="options-container hidden" id="audioOptionsList">
+              <label class="option-card active">
+                <input type="radio" name="audioFormat" value="mp3" checked />
+                <div class="opt-body">
+                  <div class="opt-main">
+                    <span class="opt-res">MP3 Audio</span>
+                    <span class="badge-hq">320 kbps (Tối ưu nhất)</span>
+                  </div>
+                  <span class="opt-size">Chuyển đổi MP3</span>
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="audioFormat" value="m4a" />
+                <div class="opt-body">
+                  <div class="opt-main">
+                    <span class="opt-res">M4A / AAC</span>
+                    <span class="badge-codec">Gốc YouTube (Original)</span>
+                  </div>
+                  <span class="opt-size" id="audioM4aSize">~ Nhỏ</span>
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="audioFormat" value="wav" />
+                <div class="opt-body">
+                  <div class="opt-main">
+                    <span class="opt-res">WAV Lossless</span>
+                    <span class="badge-codec">Âm thanh chuẩn phòng thu</span>
+                  </div>
+                  <span class="opt-size">Không nén</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Target Folder Selection -->
+            <div class="folder-select-row">
+              <span class="folder-label">Lưu vào:</span>
+              <div class="folder-path-display" id="downloadPathDisplay" title="Thư mục tải xuống">
+                C:\Users\Downloads
+              </div>
+              <button class="btn-change-folder" id="btnChangeFolder">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Đổi</span>
+              </button>
+            </div>
+
+            <!-- Start Download Button -->
+            <button class="btn-start-download" id="btnStartDownload">
+              <div class="btn-content">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                </svg>
+                <span>BẮT ĐẦU TẢI TỐC ĐỘ CAO (16 LUỒNG IDM)</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Welcome Placeholder (When no URL entered) -->
+      <section class="welcome-card" id="welcomeCard">
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon">⚡</div>
+            <h4>Tăng tốc tối đa (16x Threads)</h4>
+            <p>Sử dụng thuật toán đa luồng của aria2c kết hợp HTTP chunking 10MB để vượt qua cơ chế bóp băng thông của YouTube CDN.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">💎</div>
+            <h4>Chất lượng cực đại > 1 GB</h4>
+            <p>Hỗ trợ trích xuất đầy đủ 4K, 2K, 1080p60. Tải mượt mà các video dung lượng lớn trên 1GB đến hàng chục GB.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🚀</div>
+            <h4>Ghép Zero-Reencode (FFmpeg)</h4>
+            <p>Ghép luồng hình và âm thanh thành MP4 chuẩn chỉ trong 3 giây bằng stream-copy, không làm suy giảm chất lượng hình ảnh.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- TAB: BATCH DOWNLOAD -->
+    <main class="tab-content" id="tab-batch">
+      <!-- Batch URL Input Card -->
+      <section class="batch-input-card">
+        <div class="batch-header-row">
+          <div class="batch-title-group">
+            <h3>Danh sách liên kết tải hàng loạt</h3>
+            <p>Dán một hoặc nhiều link YouTube (mỗi dòng một link hoặc dán đoạn văn bản chứa nhiều link)</p>
+          </div>
+          <div class="batch-input-actions">
+            <button class="btn-batch-action" id="btnBatchPasteClipboard" title="Dán nhanh từ Clipboard">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Dán từ Clipboard</span>
+            </button>
+            <button class="btn-batch-action" id="btnBatchClearInput" title="Xóa nội dung ô nhập">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>Xóa ô nhập</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="batch-textarea-wrapper">
+          <textarea id="batchUrlsInput" class="batch-textarea" rows="6" placeholder="Dán danh sách link YouTube tại đây (mỗi dòng một link)...
+VD:
+https://www.youtube.com/watch?v=...
+https://youtu.be/...
+https://www.youtube.com/shorts/..."></textarea>
+          <div class="batch-url-detected" id="batchDetectedCount">Đã nhận diện: 0 liên kết hợp lệ</div>
+        </div>
+
+        <div class="batch-options-bar">
+          <div class="batch-quality-picker">
+            <label for="batchQualitySelect">Chất lượng áp dụng:</label>
+            <select id="batchQualitySelect" class="custom-select batch-select">
+              <option value="best" selected>Chất lượng cao nhất (4K / 2K / 1080p)</option>
+              <option value="1080p">Ưu tiên 1080p Full HD</option>
+              <option value="720p">Ưu tiên 720p HD</option>
+              <option value="audio">Chỉ tải Âm thanh (Audio MP3)</option>
+            </select>
+          </div>
+
+          <div class="batch-main-buttons">
+            <button class="btn-batch-start" id="btnStartBatch">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>BẮT ĐẦU TẢI HÀNG LOẠT</span>
+            </button>
+            <button class="btn-batch-pause hidden" id="btnPauseBatch">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+              <span id="btnPauseBatchText">TẠM DỪNG</span>
+            </button>
+            <button class="btn-batch-clear hidden" id="btnClearBatch">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+              <span>HỦY HÀNG ĐỢI</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Batch Queue Monitor Section -->
+      <section class="batch-monitor-card hidden" id="batchMonitorCard">
+        <div class="bm-header">
+          <div class="bm-stats">
+            <h4>Tiến độ hàng đợi: <span id="bmProgressText">0 / 0 hoàn tất</span></h4>
+            <span class="bm-speed-badge" id="bmSpeed">0.0 MB/s</span>
+          </div>
+          <div class="bm-overall-track">
+            <div class="bm-overall-fill" id="bmOverallFill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="batch-queue-list" id="batchQueueList">
+          <!-- Queue items generated via JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- TAB 2: HISTORY -->
+    <main class="tab-content" id="tab-history">
+      <div class="history-header">
+        <h2>Lịch sử các video đã tải</h2>
+        <button class="btn-clear-history" id="btnClearHistory">Xóa toàn bộ lịch sử</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="empty-state">
+          <p>Chưa có video nào được tải về.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 3: SETTINGS -->
+    <main class="tab-content" id="tab-settings">
+      <div class="settings-container">
+        <h2 class="settings-title">Cấu hình Tối ưu Băng thông & Engine</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Số luồng kết nối đồng thời (Threads / Connections)</h4>
+            <p>Mở nhiều kết nối đồng thời như IDM. Giá trị khuyến nghị: 16 luồng để khai thác tối đa đường truyền.</p>
+          </div>
+          <div class="setting-control">
+            <select id="settingConnections" class="custom-select">
+              <option value="8">8 Luồng</option>
+              <option value="16" selected>16 Luồng (Tối ưu - Khuyên dùng)</option>
+              <option value="24">24 Luồng</option>
+              <option value="32">32 Luồng (Mạng cực mạnh)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Định dạng container hoàn thiện</h4>
+            <p>Định dạng ghép sau khi tải xong luồng hình và luồng tiếng.</p>
+          </div>
+          <div class="setting-control">
+            <select id="settingContainer" class="custom-select">
+              <option value="mp4" selected>MP4 (Tương thích cao nhất)</option>
+              <option value="mkv">MKV (Hỗ trợ nhiều phụ đề & audio stream)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Kích thước HTTP Chunking</h4>
+            <p>Chia nhỏ các yêu cầu Range tới server YouTube để duy trì tốc độ burst cao liên tục.</p>
+          </div>
+          <div class="setting-control">
+            <select id="settingChunkSize" class="custom-select">
+              <option value="5M">5 MB / chunk</option>
+              <option value="10M" selected>10 MB / chunk (Chuẩn yt-dlp)</option>
+              <option value="20M">20 MB / chunk</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Chế độ hiển thị tốc độ khung hình (FPS)</h4>
+            <p>Tùy chọn hiển thị cả bản 60 FPS (siêu mượt) và 30 FPS (tiết kiệm dung lượng chuẩn như Cốc Cốc).</p>
+          </div>
+          <div class="setting-control">
+            <select id="settingFpsMode" class="custom-select">
+              <option value="all" selected>Hiển thị đầy đủ (Cả 60fps & 30fps)</option>
+              <option value="prefer60">Ưu tiên 60fps (Mượt mà nhất)</option>
+              <option value="prefer30">Ưu tiên 30fps (Tiết kiệm dung lượng)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Engine Management & Update Box -->
+        <div class="engine-management-card">
+          <div class="em-header">
+            <h4>Trạng thái & Cập nhật Engine</h4>
+            <button class="btn-update-ytdlp" id="btnUpdateYtdlp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Kiểm tra & Cập nhật yt-dlp</span>
+            </button>
+          </div>
+          <div class="engine-details-grid" id="engineDetailsGrid">
+            <!-- Populated via JS -->
+          </div>
+          <div class="update-log-box hidden" id="updateLogBox">
+            <pre id="updateLogText">Đang kiểm tra cập nhật...</pre>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Floating Sticky Bottom Mini Bar (When Downloading & in other tabs) -->
+    <div class="sticky-mini-bar hidden" id="stickyMiniBar">
+      <div class="mini-info">
+        <span class="mini-pulsing-dot"></span>
+        <div class="mini-text-group">
+          <span class="mini-speed-tag" id="miniSpeed">0.0 MB/s</span>
+          <span class="mini-video-title" id="miniVideoTitle">Đang tải video...</span>
+        </div>
+      </div>
+      <div class="mini-progress-section">
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" id="miniBarFill" style="width: 0%"></div>
+        </div>
+        <span class="mini-percent" id="miniPercent">0%</span>
+      </div>
+      <button class="btn-mini-view" id="btnMiniView">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        <span>Xem tiến độ</span>
+      </button>
+    </div>
+
+    <!-- Global Notification Toast -->
+    <div class="toast hidden" id="appToast">
+      <span class="toast-icon">ℹ️</span>
+      <span class="toast-message" id="toastMessage">Thông báo</span>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
