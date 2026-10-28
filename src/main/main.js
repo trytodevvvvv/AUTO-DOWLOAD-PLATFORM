@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, clipboard, Tray, Menu, nativeImage, nativeTheme } = require('electron');
 
-// Force dark mode at OS & Chromium level to eliminate white window brush
-nativeTheme.themeSource = 'dark';
+// Force dark mode at Chromium level to eliminate white window brush
 app.commandLine.appendSwitch('force-dark-mode');
 const path = require('path');
 const fs = require('fs');
@@ -53,7 +52,7 @@ function createWindow() {
     titleBarOverlay: isWindows ? {
       color: '#08090d',
       symbolColor: '#f3f5f9',
-      height: 36
+      height: 34
     } : false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -230,15 +229,25 @@ ipcMain.handle('dialog:select-directory', async (event, defaultPath) => {
 });
 
 ipcMain.handle('shell:open-file', async (event, filePath) => {
-  if (filePath) {
+  if (filePath && fs.existsSync(filePath)) {
     return await shell.openPath(filePath);
+  } else if (filePath) {
+    const parentDir = fs.existsSync(filePath) && fs.statSync(filePath).isDirectory() ? filePath : path.dirname(filePath);
+    if (fs.existsSync(parentDir)) {
+      return await shell.openPath(parentDir);
+    }
   }
 });
 
 ipcMain.handle('shell:open-folder', async (event, filePath) => {
-  if (filePath) {
+  if (filePath && fs.existsSync(filePath)) {
     shell.showItemInFolder(filePath);
     return true;
+  } else if (filePath) {
+    const parentDir = fs.existsSync(filePath) && fs.statSync(filePath).isDirectory() ? filePath : path.dirname(filePath);
+    if (fs.existsSync(parentDir)) {
+      return await shell.openPath(parentDir);
+    }
   }
 });
 
@@ -256,6 +265,9 @@ app.on('second-instance', () => {
 });
 
 app.whenReady().then(() => {
+  if (nativeTheme) {
+    nativeTheme.themeSource = 'dark';
+  }
   createWindow();
   createTray();
 

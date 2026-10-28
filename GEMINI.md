@@ -51,6 +51,9 @@ Tài liệu này đóng vai trò là Harness & Guardrail ràng buộc hành vi c
   + Người dùng khác khi `git clone` về máy chỉ cần chạy `npm install` và nhấp đúp file chạy là ứng dụng tự động hoạt động ngay lập tức, không bao giờ bị crash vì thiếu file config.
   + Module `configManager.js` phải có cơ chế tự động: nếu chưa có `config.json`, tự copy từ `config.example.json` hoặc tự tạo `config.json` mặc định an toàn trỏ về thư mục `Downloads` của máy người dùng đó.
   + Tuyệt đối không để lại bất kỳ đường dẫn ổ đĩa tuyệt đối cục bộ nào (như `D:\TOOL YOUTUBE\...`) trong mã nguồn. Mọi đường dẫn phải sử dụng đường dẫn tương đối hoặc tự động phát hiện qua `where.exe` / thư mục `bin/`.
+- **Chỉ đẩy code lên GitHub khi người dùng yêu cầu rõ ràng:**
+  + Khi cập nhật code, sửa lỗi, tinh chỉnh UI hoặc thêm tính năng mới, AI **TUYỆT ĐỐI KHÔNG ĐƯỢC TỰ ĐỘNG** commit và push code lên GitHub.
+  + Chỉ khi người dùng chủ động yêu cầu rõ ràng (ví dụ: *"đẩy code lên github"*, *"push code"*, *"đẩy code lên"*, v.v.) thì AI mới tiến hành đóng gói và đẩy code lên repository.
 
 ---
 

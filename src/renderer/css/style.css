@@ -71,11 +71,62 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* =========================================================
+   DEDICATED WINDOW TITLE BAR (WINDOWS 11 / CYBER DARK STYLE)
+   ========================================================= */
+
+.window-titlebar {
+  height: 34px;
+  min-height: 34px;
+  background: #08090d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  user-select: none;
+  -webkit-app-region: drag;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  padding-right: 140px; /* Nhường chỗ cho cụm nút overlay _ [] X của Windows */
+  box-sizing: border-box;
+}
+
+.titlebar-drag-area {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding-left: 14px;
+}
+
+.titlebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.titlebar-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.titlebar-title {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.25px;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding: 24px 32px;
+  min-height: calc(100vh - 34px);
+  padding: 18px 32px 32px 32px;
   max-width: 1300px;
   margin: 0 auto;
 }
@@ -89,10 +140,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 20px;
-  padding-right: 140px; /* Nhường chỗ cho cụm nút điều khiển overlay của Windows */
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 24px;
-  -webkit-app-region: drag;
   user-select: none;
 }
 
@@ -226,6 +275,14 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 24px;
+  position: sticky;
+  top: 34px;
+  z-index: 999;
+  background: rgba(8, 9, 13, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .nav-tab {
@@ -424,6 +481,7 @@ body {
   box-shadow: 0 10px 40px rgba(0, 242, 254, 0.1);
   backdrop-filter: blur(20px);
   animation: slideDown 0.3s ease-out;
+  scroll-margin-top: 100px;
 }
 
 @keyframes slideDown {
@@ -657,6 +715,7 @@ body {
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(20px);
   animation: fadeIn 0.3s ease-out;
+  scroll-margin-top: 100px;
 }
 
 @keyframes fadeIn {
@@ -806,61 +865,123 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
 }
 
-.opt-main {
+.opt-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
 .opt-res {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14.5px;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.opt-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.opt-size-col {
+  flex-shrink: 0;
+  text-align: right;
+  margin-left: auto;
+}
+
+.opt-size {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
 }
 
 .badge-res {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
   background: rgba(0, 242, 254, 0.12);
   color: var(--accent-cyan);
+  border: 1px solid rgba(0, 242, 254, 0.25);
 }
 
 .badge-fps {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
-  background: rgba(255, 145, 0, 0.15);
-  color: var(--accent-large);
+  background: rgba(0, 230, 118, 0.14);
+  color: var(--accent-green);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.badge-fps-native {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.badge-fps-saving {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .badge-codec {
   font-size: 10.5px;
+  font-weight: 600;
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .badge-large {
   font-size: 10.5px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
-  background: rgba(255, 23, 68, 0.2);
-  color: #ff3b5c;
-  border: 1px solid rgba(255, 23, 68, 0.4);
+  background: rgba(255, 23, 68, 0.16);
+  color: #ff4d6d;
+  border: 1px solid rgba(255, 23, 68, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.opt-size {
-  font-family: var(--font-mono);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
+.fps-smart-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: rgba(0, 242, 254, 0.05);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  color: #a5f3fc;
+  font-weight: 500;
 }
 
 /* Folder Selection */

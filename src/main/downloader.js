@@ -119,6 +119,12 @@ class Downloader {
       return (b.is60 ? 1 : 0) - (a.is60 ? 1 : 0);
     });
 
+    // Check if this video has any 60fps streams across all formats
+    const hasAny60fps = items.some(it => it.is60);
+
+    // Set of heights that have 60fps streams
+    const heightsWith60fps = new Set(items.filter(it => it.is60).map(it => it.height));
+
     const videoOptions = [];
 
     for (const item of items) {
@@ -126,18 +132,22 @@ class Downloader {
       const f = item.format;
       const totalEstimatedBytes = (item.filesize > 0 ? item.filesize : 0) + (f.acodec === 'none' ? bestAudioSize : 0);
 
-      let label = `${h}p`;
-      if (h >= 4320) label = `8K (${h}p)`;
-      else if (h >= 2160) label = `4K Ultra HD (${h}p)`;
-      else if (h >= 1440) label = `2K Quad HD (${h}p)`;
-      else if (h >= 1080) label = `Full HD (${h}p)`;
-      else if (h >= 720) label = `HD (${h}p)`;
-      else label = `SD (${h}p)`;
+      let cleanName = `${h}p`;
+      if (h >= 4320) cleanName = '8K Ultra HD';
+      else if (h >= 2160) cleanName = '4K Ultra HD';
+      else if (h >= 1440) cleanName = '2K Quad HD';
+      else if (h >= 1080) cleanName = 'Full HD';
+      else if (h >= 720) cleanName = 'HD 720p';
+      else cleanName = `SD ${h}p`;
 
+      const has60AtHeight = heightsWith60fps.has(h);
+      let fpsLabel = `${item.fps}fps`;
       if (item.is60) {
-        label += ` ${item.fps}fps (Siêu mượt)`;
+        fpsLabel = `${item.fps}fps (Siêu mượt)`;
+      } else if (has60AtHeight) {
+        fpsLabel = '30fps (Tiết kiệm)';
       } else {
-        label += ` 30fps (Tiết kiệm)`;
+        fpsLabel = `${item.fps}fps (Chuẩn gốc)`;
       }
 
       const formatSpec = item.is60
@@ -146,9 +156,12 @@ class Downloader {
 
       videoOptions.push({
         height: h,
-        label: label,
+        name: cleanName,
+        label: `${cleanName} - ${fpsLabel}`,
         fps: item.fps,
+        fpsLabel: fpsLabel,
         is60: item.is60,
+        has60AtHeight: has60AtHeight,
         codec: (item.vcodec || '').split('.')[0],
         estimatedBytes: totalEstimatedBytes,
         estimatedSizeStr: totalEstimatedBytes > 0 ? this.formatBytes(totalEstimatedBytes) : 'Ước lượng theo luồng',
@@ -168,6 +181,7 @@ class Downloader {
       uploadDate: data.upload_date || '',
       webpageUrl: data.webpage_url,
       videoOptions: videoOptions,
+      hasAny60fps: hasAny60fps,
       bestAudioSizeStr: bestAudioSize > 0 ? this.formatBytes(bestAudioSize) : 'Nhỏ'
     };
   }
@@ -213,10 +227,12 @@ class Downloader {
     // High Speed Accelerator Engine (aria2c or multi-chunk)
     const connections = options.connections || 16;
     if (paths.aria2c && options.useAria2 !== false) {
+      // aria2c strictly enforces: -x (max-connection-per-server) must be between 1 and 16
+      const maxConnPerServer = Math.min(16, connections);
       args.push('--external-downloader', 'aria2c');
       args.push(
         '--external-downloader-args',
-        `aria2c:-x ${connections} -s ${connections} -j ${connections} -k 1M --min-split-size=1M --summary-interval=1`
+        `aria2c:-x ${maxConnPerServer} -s ${connections} -j ${maxConnPerServer} -k 1M --min-split-size=1M --summary-interval=1`
       );
     } else {
       // Native yt-dlp chunking & concurrent fragments
@@ -225,7 +241,9 @@ class Downloader {
     }
 
     return new Promise((resolve, reject) => {
-      const proc = spawn(paths.ytdlp, args);
+      const proc = spawn(paths.ytdlp, args, {
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }
+      });
       this.activeProcesses.set(id, proc);
 
       let finalFilePath = '';
@@ -233,6 +251,7 @@ class Downloader {
       let currentGid = null;
       let streamIndex = 0;
       let lastUnifiedPercent = 0;
+      let lastErrorMessage = '';
 
       onStatusChange({ id, status: 'downloading', message: 'Đang khởi tạo đa luồng với tốc độ tối đa...' });
 
@@ -243,6 +262,10 @@ class Downloader {
         for (const line of lines) {
           const trimmed = line.trim();
           if (!trimmed) continue;
+
+          if (trimmed.startsWith('ERROR:') || trimmed.includes('Exception:') || trimmed.includes('errorCode=') || trimmed.includes('[download] Got error')) {
+            lastErrorMessage = trimmed;
+          }
 
           // Track stream switches
           if (trimmed.includes('[download] Destination:') || trimmed.includes('has already been downloaded')) {
@@ -434,6 +457,32 @@ class Downloader {
       proc.on('close', (code) => {
         this.activeProcesses.delete(id);
         if (code === 0) {
+          // Verify and resolve exact real file path on disk (resolves any emoji or unicode console encoding differences)
+          if (!finalFilePath || !fs.existsSync(finalFilePath)) {
+            try {
+              const files = fs.readdirSync(downloadDir);
+              const mediaExts = ['.mp4', '.mkv', '.webm', '.mp3', '.m4a', '.wav'];
+              const matched = files
+                .filter(f => mediaExts.some(ext => f.toLowerCase().endsWith(ext)))
+                .map(f => {
+                  const full = path.join(downloadDir, f);
+                  try {
+                    return { full, mtime: fs.statSync(full).mtimeMs };
+                  } catch (e) {
+                    return null;
+                  }
+                })
+                .filter(Boolean)
+                .sort((a, b) => b.mtime - a.mtime);
+
+              if (matched.length > 0) {
+                finalFilePath = matched[0].full;
+              }
+            } catch (e) {
+              console.error('Error resolving final file path:', e);
+            }
+          }
+
           lastUnifiedPercent = 100;
           onProgress({
             id,
@@ -452,8 +501,8 @@ class Downloader {
           });
           resolve({ id, success: true, filePath: finalFilePath });
         } else {
-          onStatusChange({ id, status: 'error', message: 'Quá trình tải thất bại hoặc đã bị dừng.' });
-          reject(new Error(`Quá trình tải kết thúc với mã lỗi ${code}`));
+          onStatusChange({ id, status: 'error', message: lastErrorMessage || 'Quá trình tải thất bại hoặc đã bị dừng.' });
+          reject(new Error(lastErrorMessage || `Quá trình tải kết thúc với mã lỗi ${code}`));
         }
       });
 

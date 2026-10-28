@@ -400,27 +400,56 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Smart notification when user prefers 60fps but video has no 60fps streams on YouTube
+    if (fpsMode === 'prefer60' && !info.hasAny60fps) {
+      const noticeDiv = document.createElement('div');
+      noticeDiv.className = 'fps-smart-notice';
+      noticeDiv.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Video này được tác giả tải lên ở chuẩn gốc 30 FPS (không có bản 60 FPS trên máy chủ YouTube).</span>
+      `;
+      videoOptionsList.appendChild(noticeDiv);
+    }
+
     optionsToDisplay.forEach((opt, idx) => {
       const label = document.createElement('label');
       label.className = `option-card ${idx === 0 ? 'active' : ''}`;
 
-      const isLargeTag = opt.isLarge ? `<span class="badge-large">⚡ >1 GB (${opt.estimatedSizeStr})</span>` : '';
-      const fpsTag = opt.fps >= 50 
-        ? `<span class="badge-fps">${opt.fps}fps</span>` 
-        : `<span class="badge-codec">30fps</span>`;
-      const codecTag = opt.codec ? `<span class="badge-codec">${opt.codec.toUpperCase()}</span>` : '';
+      const resBadge = `<span class="badge-res">${opt.height}p</span>`;
+
+      let fpsBadge = '';
+      if (opt.is60) {
+        fpsBadge = `<span class="badge-fps">${opt.fps || 60}fps (Siêu mượt)</span>`;
+      } else if (opt.has60AtHeight) {
+        fpsBadge = `<span class="badge-fps-saving">30fps (Tiết kiệm)</span>`;
+      } else {
+        fpsBadge = `<span class="badge-fps-native">${opt.fps || 30}fps (Chuẩn gốc)</span>`;
+      }
+
+      const codecBadge = opt.codec ? `<span class="badge-codec">${opt.codec.toUpperCase()}</span>` : '';
+      const largeBadge = opt.isLarge ? `<span class="badge-large">⚡ >1 GB</span>` : '';
+
+      const titleName = opt.name || opt.label.split(' - ')[0] || `${opt.height}p`;
 
       label.innerHTML = `
         <input type="radio" name="videoFormat" value="${opt.formatId}" data-height="${opt.height}" ${idx === 0 ? 'checked' : ''} />
         <div class="opt-body">
-          <div class="opt-main">
-            <span class="opt-res">${opt.label}</span>
-            <span class="badge-res">${opt.height}p</span>
-            ${fpsTag}
-            ${codecTag}
-            ${isLargeTag}
+          <div class="opt-left">
+            <span class="opt-res">${titleName}</span>
+            <div class="opt-badges">
+              ${resBadge}
+              ${fpsBadge}
+              ${codecBadge}
+              ${largeBadge}
+            </div>
           </div>
-          <span class="opt-size">${opt.estimatedSizeStr}</span>
+          <div class="opt-size-col">
+            <span class="opt-size">${opt.estimatedSizeStr}</span>
+          </div>
         </div>
       `;
 
