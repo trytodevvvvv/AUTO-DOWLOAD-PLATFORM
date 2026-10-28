@@ -192,46 +192,117 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     engineDetailsGrid.innerHTML = `
-      <div class="engine-detail-box" title="Đường dẫn đầy đủ: ${status.ytdlp.path || ''}">
+      <div class="engine-detail-box ${!status.ytdlp.exists ? 'engine-missing-highlight' : ''}" title="Đường dẫn đầy đủ: ${status.ytdlp.path || ''}">
         <div class="ed-header">
           <div class="ed-title-group">
-            <span class="status-dot ${status.ytdlp.exists ? 'active' : ''}"></span>
+            <span class="status-dot ${status.ytdlp.exists ? 'active' : 'inactive'}"></span>
             <span class="ed-name">yt-dlp Core</span>
           </div>
-          <span class="ed-val">${status.ytdlp.version || 'Chưa cài đặt'}</span>
+          <span class="ed-val ${!status.ytdlp.exists ? 'val-warning' : ''}">${status.ytdlp.version || 'Chưa cài đặt'}</span>
         </div>
         <div class="ed-path-row">
           <span class="ed-path-label">Vị trí:</span>
           <span class="ed-path" title="${status.ytdlp.path || ''}">${formatDisplayPath(status.ytdlp.path)}</span>
         </div>
       </div>
-      <div class="engine-detail-box" title="Đường dẫn đầy đủ: ${status.aria2c.path || ''}">
+      <div class="engine-detail-box ${!status.aria2c.exists ? 'engine-missing-highlight' : ''}" title="Đường dẫn đầy đủ: ${status.aria2c.path || ''}">
         <div class="ed-header">
           <div class="ed-title-group">
-            <span class="status-dot ${status.aria2c.exists ? 'active' : ''}"></span>
+            <span class="status-dot ${status.aria2c.exists ? 'active' : 'inactive'}"></span>
             <span class="ed-name">aria2c Accelerator</span>
           </div>
-          <span class="ed-val">${status.aria2c.version ? '16x Luồng (v1.37)' : 'Chưa cài đặt'}</span>
+          <span class="ed-val ${!status.aria2c.exists ? 'val-warning' : ''}">${status.aria2c.version ? '16x Luồng (v1.37)' : 'Chưa cài đặt'}</span>
         </div>
         <div class="ed-path-row">
           <span class="ed-path-label">Vị trí:</span>
           <span class="ed-path" title="${status.aria2c.path || ''}">${formatDisplayPath(status.aria2c.path)}</span>
         </div>
+        ${!status.aria2c.exists ? `
+          <div class="ed-action-row">
+            <button class="btn-install-sub" id="btnInstallAria2c">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Cài đặt aria2c Accelerator</span>
+            </button>
+          </div>
+        ` : ''}
       </div>
-      <div class="engine-detail-box" title="Đường dẫn đầy đủ: ${status.ffmpeg.path || ''}">
+      <div class="engine-detail-box ${!status.ffmpeg.exists ? 'engine-missing-highlight' : ''}" title="Đường dẫn đầy đủ: ${status.ffmpeg.path || ''}">
         <div class="ed-header">
           <div class="ed-title-group">
-            <span class="status-dot ${status.ffmpeg.exists ? 'active' : ''}"></span>
+            <span class="status-dot ${status.ffmpeg.exists ? 'active' : 'inactive'}"></span>
             <span class="ed-name">FFmpeg Muxer</span>
           </div>
-          <span class="ed-val">${status.ffmpeg.exists ? 'v8.1 (Stream Copy)' : 'Chưa cài đặt'}</span>
+          <span class="ed-val ${!status.ffmpeg.exists ? 'val-warning' : ''}">${status.ffmpeg.exists ? (status.ffmpeg.version ? 'v' + (status.ffmpeg.version.match(/version\s+([^\s]+)/i)?.[1] || 'Stream Copy') : 'Stream Copy') : 'Chưa cài đặt'}</span>
         </div>
         <div class="ed-path-row">
           <span class="ed-path-label">Vị trí:</span>
           <span class="ed-path" title="${status.ffmpeg.path || ''}">${formatDisplayPath(status.ffmpeg.path)}</span>
         </div>
+        ${!status.ffmpeg.exists ? `
+          <div class="ed-action-row">
+            <button class="btn-install-sub" id="btnInstallFfmpeg">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Tải & Cài đặt FFmpeg (Tự động)</span>
+            </button>
+          </div>
+        ` : ''}
       </div>
     `;
+
+    // Bind dynamic install actions if elements exist
+    const btnInstallFfmpeg = document.getElementById('btnInstallFfmpeg');
+    if (btnInstallFfmpeg) {
+      btnInstallFfmpeg.addEventListener('click', async () => {
+        btnInstallFfmpeg.disabled = true;
+        btnInstallFfmpeg.innerHTML = `<span>Đang tải & cài đặt...</span>`;
+        if (updateLogBox) updateLogBox.classList.remove('hidden');
+        if (updateLogText) updateLogText.textContent = 'Đang kết nối tải FFmpeg Win64 từ GitHub Releases...';
+        showToast('Bắt đầu tải và cài đặt FFmpeg...', 'info');
+
+        try {
+          await window.api.installBinary('ffmpeg');
+          if (updateLogText) updateLogText.textContent = 'Đã hoàn tất tải và cấu hình FFmpeg vào thư mục bin/ thành công!';
+          showToast('Cài đặt FFmpeg thành công!', 'success');
+          await checkEngineStatus(true);
+        } catch (err) {
+          if (updateLogText) updateLogText.textContent = 'Lỗi cài đặt FFmpeg: ' + err.message;
+          showToast('Lỗi khi tải FFmpeg: ' + err.message, 'error');
+          btnInstallFfmpeg.disabled = false;
+          btnInstallFfmpeg.innerHTML = `<span>Thử lại</span>`;
+        }
+      });
+    }
+
+    const btnInstallAria2c = document.getElementById('btnInstallAria2c');
+    if (btnInstallAria2c) {
+      btnInstallAria2c.addEventListener('click', async () => {
+        btnInstallAria2c.disabled = true;
+        btnInstallAria2c.innerHTML = `<span>Đang tải...</span>`;
+        if (updateLogBox) updateLogBox.classList.remove('hidden');
+        if (updateLogText) updateLogText.textContent = 'Đang tải aria2c accelerator...';
+        showToast('Bắt đầu cài đặt aria2c...', 'info');
+
+        try {
+          await window.api.installBinary('aria2c');
+          if (updateLogText) updateLogText.textContent = 'Đã cài đặt aria2c thành công!';
+          showToast('Cài đặt aria2c thành công!', 'success');
+          await checkEngineStatus(true);
+        } catch (err) {
+          if (updateLogText) updateLogText.textContent = 'Lỗi cài đặt aria2c: ' + err.message;
+          showToast('Lỗi khi tải aria2c: ' + err.message, 'error');
+          btnInstallAria2c.disabled = false;
+          btnInstallAria2c.innerHTML = `<span>Thử lại</span>`;
+        }
+      });
+    }
   }
 
   // Clipboard Paste Helper
@@ -608,6 +679,28 @@ document.addEventListener('DOMContentLoaded', () => {
       btnCancelDownload.classList.add('hidden');
     }
   });
+
+  // Real-time Engine Installation Progress Listener
+  if (window.api.onEngineProgress) {
+    window.api.onEngineProgress((data) => {
+      if (updateLogBox && updateLogText) {
+        updateLogBox.classList.remove('hidden');
+        if (data.name === 'ffmpeg') {
+          const mb = data.totalBytes
+            ? ` (${(data.downloadedBytes / (1024 * 1024)).toFixed(1)}MB / ${(data.totalBytes / (1024 * 1024)).toFixed(1)}MB)`
+            : '';
+          updateLogText.textContent = `Đang tải FFmpeg Win64 từ GitHub: ${data.percent}%${mb}...`;
+        } else if (data.name === 'aria2c') {
+          const mb = data.totalBytes
+            ? ` (${(data.downloadedBytes / (1024 * 1024)).toFixed(1)}MB / ${(data.totalBytes / (1024 * 1024)).toFixed(1)}MB)`
+            : '';
+          updateLogText.textContent = `Đang tải aria2c: ${data.percent}%${mb}...`;
+        } else if (data.name === 'ytdlp') {
+          updateLogText.textContent = `Đang tải yt-dlp: ${data.percent}%...`;
+        }
+      }
+    });
+  }
 
   // Tab Navigation Handling
   function setupTabNavigation() {

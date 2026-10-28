@@ -196,6 +196,8 @@ class Downloader {
     // Set ffmpeg location
     if (paths.ffmpeg) {
       args.push('--ffmpeg-location', path.dirname(paths.ffmpeg));
+    } else if (options.isAudioOnly || !options.formatId || options.formatId.includes('+')) {
+      throw new Error('Chưa tìm thấy thư viện FFmpeg để ghép hình & tiếng. Vui lòng vào tab "Cấu hình tốc độ" và nhấn "Cài đặt FFmpeg (Tự động)".');
     }
 
     // Audio or Video selection

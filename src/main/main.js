@@ -179,6 +179,10 @@ ipcMain.handle('engine:install', async (event, name) => {
     return await binManager.installAria2c((prog) => {
       mainWindow?.webContents.send('engine:progress', { name: 'aria2c', ...prog });
     });
+  } else if (name === 'ffmpeg') {
+    return await binManager.installFfmpeg((prog) => {
+      mainWindow?.webContents.send('engine:progress', { name: 'ffmpeg', ...prog });
+    });
   }
   throw new Error('Unknown engine name: ' + name);
 });

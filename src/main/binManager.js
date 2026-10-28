@@ -224,6 +224,65 @@ class BinManager {
     return path.join(this.binDir, 'aria2c.exe');
   }
 
+  async installFfmpeg(onProgress) {
+    const url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip';
+    const zipDest = path.join(this.binDir, 'ffmpeg.zip');
+    await this.downloadFile(url, zipDest, onProgress);
+
+    const extractDir = path.join(this.binDir, 'ffmpeg_temp');
+    if (!fs.existsSync(extractDir)) fs.mkdirSync(extractDir, { recursive: true });
+
+    try {
+      const res = spawn('tar.exe', ['-xf', 'ffmpeg.zip', '-C', 'ffmpeg_temp'], { cwd: this.binDir });
+      await new Promise((resolve, reject) => {
+        res.on('close', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(`tar extraction failed with code ${code}`));
+        });
+        res.on('error', reject);
+      });
+
+      const findBinaryInDir = (dir, targetName) => {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+          const full = path.join(dir, file);
+          if (fs.statSync(full).isDirectory()) {
+            const found = findBinaryInDir(full, targetName);
+            if (found) return found;
+          } else if (file.toLowerCase() === targetName.toLowerCase()) {
+            return full;
+          }
+        }
+        return null;
+      };
+
+      const extractedFfmpeg = findBinaryInDir(extractDir, 'ffmpeg.exe');
+      if (extractedFfmpeg) {
+        const targetFfmpeg = path.join(this.binDir, 'ffmpeg.exe');
+        if (fs.existsSync(targetFfmpeg)) {
+          try { fs.unlinkSync(targetFfmpeg); } catch (e) {}
+        }
+        fs.copyFileSync(extractedFfmpeg, targetFfmpeg);
+
+        const extractedFfprobe = findBinaryInDir(extractDir, 'ffprobe.exe');
+        if (extractedFfprobe) {
+          const targetFfprobe = path.join(this.binDir, 'ffprobe.exe');
+          if (fs.existsSync(targetFfprobe)) {
+            try { fs.unlinkSync(targetFfprobe); } catch (e) {}
+          }
+          fs.copyFileSync(extractedFfprobe, targetFfprobe);
+        }
+      } else {
+        throw new Error('Không tìm thấy file ffmpeg.exe trong gói giải nén');
+      }
+    } finally {
+      try { if (fs.existsSync(zipDest)) fs.unlinkSync(zipDest); } catch (e) {}
+      try { if (fs.existsSync(extractDir)) fs.rmSync(extractDir, { recursive: true, force: true }); } catch (e) {}
+    }
+
+    return path.join(this.binDir, 'ffmpeg.exe');
+  }
+
   async updateYtDlp() {
     const paths = this.getPaths();
     if (!paths.ytdlp) {

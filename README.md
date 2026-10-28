@@ -66,7 +66,7 @@ Hoặc chạy lệnh từ dòng lệnh:
 npm start
 ```
 
-*Lưu ý: Ứng dụng đã tích hợp sẵn `yt-dlp` và `aria2c` trong thư mục `bin/`. Để tính năng ghép file hoạt động tốt nhất, hãy đảm bảo máy tính đã cài đặt [FFmpeg](https://ffmpeg.org/) (có trong PATH hoặc đặt file `ffmpeg.exe` vào thư mục `bin/`).*
+*Lưu ý: Ứng dụng đã tích hợp sẵn `yt-dlp` và `aria2c` trong thư mục `bin/`. Đối với `FFmpeg`, nếu máy tính của bạn chưa có, bạn chỉ cần mở tab **"Cấu hình tốc độ"** trong ứng dụng và bấm nút **"Tải & Cài đặt FFmpeg (Tự động)"**, tool sẽ tự tải và cấu hình vào `bin/` hoàn toàn tự động chỉ với 1 click.*
 
 ---
 
